@@ -1,2 +1,2 @@
 # timer.html
-# how do you do, fellow kids?
+just a small project meant to help me learn p5 :)
