@@ -1,9 +1,12 @@
-var timeLeft;
-var timeList = [5, 5, 5];
+var timeLeft = 0;
+var timeList = [5, 9, 2];
 var currentInt = 0;
-
 var startTime = 0;
 var currentTime = 0;
+var start;
+var interval;
+var status = "start";
+var difference;
 
 function convertSeconds(s) {
 	var min = floor(s / 60);
@@ -13,6 +16,7 @@ function convertSeconds(s) {
 	// of digits specified.
 }
 
+
 var ding;
 function preload() {
 	var context = new AudioContext();
@@ -20,38 +24,69 @@ function preload() {
 }
 
 
-timeLeft = timeList[currentInt];
+
 //timeLeft = 10;
 
 function setup() {
 	noCanvas(); // won't use a canvas
 	// add a button or sumn to set startTime to whenever a button is clicked
-	startTime = millis(); // use millis() to get the amount of time elasped from
+	 // use millis() to get the amount of time elasped from
 	// when the page started
 
+	start = createButton(status);
+	start.mousePressed(startStopTimer);
+	 // THE PROBLEM IS NOT HERE
+
+	 // setInterval wants an event to happen ever so
+		 //often, every 1000 milliseconds, to be exact
+
 	var timer = select('#timer'); // selects timer id in html
-  timer.html(convertSeconds(timeLeft - currentTime)); //display the value of counter
 
-	var done = select('#status');
 
-	var interval = setInterval(timeIt, 1000); // setInterval wants an event to happen ever so
-	// often, every 1000 milliseconds, to be exact
+	function startStopTimer() {
+		if (status == 'start') { // start the timer
+			status = 'stop';
+			startTime = millis();
+			console.log("start time:" + startTime);
+			timeLeft = timeList[currentInt]; // THE PROBLEM IS NOT HERE
+			timer.html(convertSeconds(timeLeft - currentTime)); // the problem isnt here either
+
+
+			interval = setInterval(timeIt, 1000);
+			console.log("the timer has started");
+
+		} else { // stop the timer
+			status = 'start';
+
+			clearInterval(interval);
+			console.log("im clicking the stop button");
+		}
+	}
+
+
 
 	function timeIt() {
-		currentTime = floor((millis() - startTime)/1000);
-		 //increase the counter by 1 every second
+		currentTime = floor((millis() - startTime)/1000); // somehow keep current time the same
+		console.log("current time:" + currentTime);
+		//console.log("see this when the timer is actively ticking down");
+		//increase the counter by 1 every second
 
 		if (currentTime == timeLeft) {
+			console.log("the ding is playing rn");
 			ding.play();
 			currentInt++;
-			timeLeft = timeList[currentInt] + currentTime;
-			//console.log("can you see this");
-			//clearInterval(interval);
-			//currentInt == timeList.length ? clearInterval(interval) : console.log("keep going");
+			timeLeft = timeList[currentInt] + currentTime; // the problem isnt here
+
+		} if (currentInt == timeList.length) {
+			console.log("the timer is done");
+			clearInterval(interval);
+			timer.html("00:00");
+			return;
 		}
-		timer.html(convertSeconds(timeLeft - currentTime));
+		timer.html(convertSeconds(timeLeft - currentTime)); // THEPROBLEM IS NOT HERE
 	}
-	//console.log("how about this?");
 }
 
-//console.log(timeList[0])
+function mousePressed() {
+
+}
