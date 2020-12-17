@@ -1,10 +1,12 @@
 var timeLeft = 0;
-var timeList = [2, 3];
+var timeList = [];
 var currentInt = 0;
 var currentTime = 0;
 var interval;
 var status = "start";
 var totalTimePaused = 0;
+var beforeTimeList = []; // basically timeList, but is supposed to be what the program displays
+//(timeList should be created after all the start button is pressed and should consist of the values in beforeTimeList)
 
 function convertSeconds(s) {
 	var min = floor(s / 60);
@@ -17,12 +19,17 @@ function convertSeconds(s) {
 function repeatRounds(set, rounds) { // assuming that this will be used on timeList and only timeList
 	var allSets = []; // create a local empty array
 	//console.log(set);
-	for (i = 0; i < rounds; i++) {
+	for ((set == timeList ? i = 1 : i = 0); i < rounds; i++) {
 		allSets.push(set); // push the given set into the array for the specified # of rounds using a for loop
 	}
-	timeList = allSets.flat(); // make sure there are no arrays within arrays that will confuse the program when running the timer
+	timeList.push(allSets.flat());
+	timeList = timeList.flat() // make sure there are no arrays within arrays that will confuse the program when running the timer
 	return timeList; // return timeList
 }
+
+
+
+//repeatRounds([2, 1], 3);
 
 var ding;
 function preload() {
@@ -34,15 +41,39 @@ function setup() {
 	noCanvas(); // won't use a canvas
 	 // use millis() to get the amount of time elasped from
 	// when the page started
+	var test = select('#list');
+	test.html(beforeTimeList);
+
+	var getInput = select('#input');
+	getInput.position(25, 100);
+	getInput = createInput('');
+
+
+	var testButton = createButton('enter');
+	testButton.mousePressed(takeInput);
+	//testButton.position(10, 130);
 
 	var start = createButton(status); // create a button start that will be used to start and pause the timer
 	start.mousePressed(startStopTimer); // have it perform the startStopTimer function everytime it's clicked
+	start.position(10, 130);
 
 	var timer = select('#timer'); // selects timer id in html
 	var stopTime = 0;
 	var timePaused = 0;
 	totalTimePaused = 0;
 	timeLeft = timeList[currentInt];
+
+	function takeInput() {
+		beforeTimeList.push(getInput.value());
+		test.html(beforeTimeList);
+	} // add what happens if getInput is undefined
+
+	//function formatBTimeList() {
+		//for (i=0; i<beforeTimeList.length; i++) {
+			//text(beforeTimeList[i], 100, 100+(i * 50));
+
+		//}
+	//}
 
 
 	function startStopTimer() {
