@@ -5,8 +5,6 @@ var currentTime = 0;
 var interval;
 var status = "start";
 var totalTimePaused = 0;
-var beforeTimeList = []; // basically timeList, but is supposed to be what the program displays
-//(timeList should be created after all the start button is pressed and should consist of the values in beforeTimeList)
 
 function convertSeconds(s) {
 	var min = floor(s / 60);
@@ -27,8 +25,6 @@ function repeatRounds(set, rounds) { // assuming that this will be used on timeL
 	return timeList; // return timeList
 }
 
-
-
 //repeatRounds([2, 1], 3);
 
 var ding;
@@ -38,43 +34,35 @@ function preload() {
 }
 
 function setup() {
-	noCanvas(); // won't use a canvas
-	 // use millis() to get the amount of time elasped from
-	// when the page started
-	var test = select('#list');
-	test.html(beforeTimeList);
+	createCanvas(1000, 1000); // create a canvas for all the text to appear on
 
-	var getInput = select('#input');
-	getInput.position(25, 100);
-	getInput = createInput('');
+	intervalTable = new p5.Table(); // create a Table to display the intervals in a list formation
+
+	var getInput = select('#input'); // is the text input box
+	getInput = createInput(''); // show nothing in the input box when you first load it
+	getInput.position(60, 150); // create variables for these values?
 
 
-	var testButton = createButton('enter');
-	testButton.mousePressed(takeInput);
-	//testButton.position(10, 130);
+	var enter = createButton('enter'); // is the button to press to store value in input box in timeList/display it
+	enter.mousePressed(takeInput); // when the enter button is pressed, store the value in the box, add it to intervalTable/display it, and add it to timeList
+	enter.position(10, 150);
 
 	var start = createButton(status); // create a button start that will be used to start and pause the timer
 	start.mousePressed(startStopTimer); // have it perform the startStopTimer function everytime it's clicked
-	start.position(10, 130);
+	start.position(10, 100);
 
 	var timer = select('#timer'); // selects timer id in html
+	timer.position(80, 0);
 	var stopTime = 0;
 	var timePaused = 0;
 	totalTimePaused = 0;
-	timeLeft = timeList[currentInt];
+
 
 	function takeInput() {
-		beforeTimeList.push(getInput.value());
-		test.html(beforeTimeList);
+		intervalTable.addColumn(getInput.value()); // add the value in the input box to intervalTable
+		timeList.push(+getInput.value()) // also, convert the string into a number & add it to timeList (array)
+		timeLeft = timeList[currentInt]; // set the first timeLeft to timeList[currentInt] (takeInput shouldn't happen when the timer is going!!)
 	} // add what happens if getInput is undefined
-
-	//function formatBTimeList() {
-		//for (i=0; i<beforeTimeList.length; i++) {
-			//text(beforeTimeList[i], 100, 100+(i * 50));
-
-		//}
-	//}
-
 
 	function startStopTimer() {
 		if (status == 'start') { // start the timer
@@ -127,6 +115,21 @@ function setup() {
 		console.log(timeLeft - currentTime);
 		timer.html(convertSeconds(timeLeft - currentTime)); // if the above conditions
 	} // are not met, display the timeLeft - currentTime. currentTime is meant to increment up by 1 each second.
+}
+
+function draw() {
+	var textX = 100;
+	text("Intervals:", textX, 180); // this is the title of intervalTable
+
+	for (i=0; i < intervalTable.columns.length; i++) {
+		(i+1 == currentInt ? text("x", textX-15, 200 + 10 * i) : text(""));
+		// if the interval being drawn is the current interval, display an x next to that interval
+		// that "x" stays there after the interval is over and the timer moves onto the next one
+		text(convertSeconds(intervalTable.columns[i]), textX, 200 + 10 * i);
+		// convert the raw number stored in getInput into its display form
+		// use a for loop to go through intervalTable, taking each value and putting it into a list format
+	}
+
 }
 
 function mousePressed() {
