@@ -5,6 +5,9 @@ var currentTime = 0;
 var interval;
 var status = "start";
 var totalTimePaused = 0;
+var enterShown = true;
+//var resetted = false;
+var shownText;
 
 function convertSeconds(s) {
 	var min = floor(s / 60);
@@ -25,9 +28,7 @@ function repeatRounds(set, rounds) { // assuming that this will be used on timeL
 	return timeList; // return timeList
 }
 
-//repeatRounds([2, 1], 3);
-
-var ding;
+var ding; // load in the ding sfx for when an interval ends
 function preload() {
 	var context = new AudioContext();
 	ding = loadSound("ding.wav"); // load the sound in
@@ -48,6 +49,7 @@ function setup() {
 	enter.position(10, 150);
 
 	var start = createButton(status); // create a button start that will be used to start and pause the timer
+	start.hide();
 	start.mousePressed(startStopTimer); // have it perform the startStopTimer function everytime it's clicked
 	start.position(10, 100);
 
@@ -57,14 +59,24 @@ function setup() {
 	var timePaused = 0;
 	totalTimePaused = 0;
 
+	var reset = createButton('reset');
+	reset.hide();
+	reset.mousePressed(resetEverything);
+	reset.position(10, 100);
+
 
 	function takeInput() {
-		intervalTable.addColumn(getInput.value()); // add the value in the input box to intervalTable
+		//resetted = false;
+		//intervalTable.addColumn(getInput.value()); // add the value in the input box to intervalTable
 		timeList.push(+getInput.value()) // also, convert the string into a number & add it to timeList (array)
 		timeLeft = timeList[currentInt]; // set the first timeLeft to timeList[currentInt] (takeInput shouldn't happen when the timer is going!!)
+		if (timeList.length > 0) {
+			start.show();
+		}
 	} // add what happens if getInput is undefined
 
 	function startStopTimer() {
+		removeShowEnter();
 		if (status == 'start') { // start the timer
 			status = 'stop'; // change the timer to say "stop"
 			start.html(status);
@@ -87,6 +99,7 @@ function setup() {
 
 		} else { // if the timer has ended, you can't play or pause anything
 			timer.html("00:00"); // keep at 00:00
+			start.remove();
 			console.log("you should be seeing this when the timer is over");
 		}
 	}
@@ -109,28 +122,58 @@ function setup() {
 			console.log("the timer is done");
 			clearInterval(interval); // stop timeIt from happening every second
 			timer.html("00:00"); // revert back to 00:00
-			status = 'nope';
+			status = 'done';
+			start.hide();
+			reset.show();
+			//removeShowEnter();
 			return; // gtfo here
 		}
 		console.log(timeLeft - currentTime);
 		timer.html(convertSeconds(timeLeft - currentTime)); // if the above conditions
 	} // are not met, display the timeLeft - currentTime. currentTime is meant to increment up by 1 each second.
+
+	function removeShowEnter() {
+		if (enterShown) {
+			enter.hide();
+			getInput.hide();
+			enterShown = false;
+		} else {
+			enter.show();
+			getInput.show();
+			enterShown = true;
+		}
+	}
+
+	function resetEverything() {
+		//resetted = true;
+		timeLeft = 0;
+		currentInt = 0;
+		currentTime = 0;
+		totalTimePaused = 0;
+		timeList = [];
+		removeShowEnter();
+		status = 'start';
+		start.html(status);
+		start.show();
+		reset.hide();
+	}
 }
 
 function draw() {
 	var textX = 100;
 	text("Intervals:", textX, 180); // this is the title of intervalTable
 
-	for (i=0; i < intervalTable.columns.length; i++) {
+	for (i=0; i < timeList.length; i++) {
 		(i+1 == currentInt ? text("x", textX-15, 200 + 10 * i) : text(""));
 		// if the interval being drawn is the current interval, display an x next to that interval
 		// that "x" stays there after the interval is over and the timer moves onto the next one
-		text(convertSeconds(intervalTable.columns[i]), textX, 200 + 10 * i);
+		shownText = text(convertSeconds(timeList[i]), textX, 200 + 10 * i);
 		// convert the raw number stored in getInput into its display form
 		// use a for loop to go through intervalTable, taking each value and putting it into a list format
 	}
-
 }
+
+
 
 function mousePressed() {
 
