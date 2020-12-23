@@ -65,17 +65,25 @@ function setup() {
 	reset.position(10, 100);
 
 
+
 	function takeInput() {
 		//resetted = false;
 		//intervalTable.addColumn(getInput.value()); // add the value in the input box to intervalTable
-		timeList.push(+getInput.value()) // also, convert the string into a number & add it to timeList (array)
-		timeLeft = timeList[currentInt]; // set the first timeLeft to timeList[currentInt] (takeInput shouldn't happen when the timer is going!!)
+		((+getInput.value() <= 0 || typeof getInput.value() == 'string') ? invalidInput() : timeList.push(+getInput.value())); // also, convert the string into a number & add it to timeList (array)
+		 // set the first timeLeft to timeList[currentInt] (takeInput shouldn't happen when the timer is going!!)
 		if (timeList.length > 0) {
+			timeLeft = timeList[currentInt];
 			start.show();
 		}
 	} // add what happens if getInput is undefined
 
+	function invalidInput() {
+		warning = text('enter a valid interval please!', 50, 250);
+		//setInterval(background(255, 255, 255), 3000);
+	}
+
 	function startStopTimer() {
+
 		removeShowEnter();
 		if (status == 'start') { // start the timer
 			status = 'stop'; // change the timer to say "stop"
@@ -145,17 +153,22 @@ function setup() {
 	}
 
 	function resetEverything() {
-		//resetted = true;
-		timeLeft = 0;
+		background(255, 255, 255); // paint the canvas completely white, remove all the intervals from the display
+		timeLeft = 0; // reset alll timer values to be 0
 		currentInt = 0;
 		currentTime = 0;
 		totalTimePaused = 0;
-		timeList = [];
+
+		stopTime = 0;
+		timePaused = 0;
+
+		timeList = []; // make timeList empty
 		removeShowEnter();
 		status = 'start';
 		start.html(status);
-		start.show();
+		//start.show();
 		reset.hide();
+
 	}
 }
 
@@ -164,13 +177,15 @@ function draw() {
 	text("Intervals:", textX, 180); // this is the title of intervalTable
 
 	for (i=0; i < timeList.length; i++) {
-		(i+1 == currentInt ? text("x", textX-15, 200 + 10 * i) : text(""));
-		// if the interval being drawn is the current interval, display an x next to that interval
-		// that "x" stays there after the interval is over and the timer moves onto the next one
-		shownText = text(convertSeconds(timeList[i]), textX, 200 + 10 * i);
-		// convert the raw number stored in getInput into its display form
-		// use a for loop to go through intervalTable, taking each value and putting it into a list format
+			(i+1 == currentInt ? text("x", textX-15, 200 + 10 * i) : text(""));
+			// if the interval being drawn is the current interval, display an x next to that interval
+			// that "x" stays there after the interval is over and the timer moves onto the next one
+			shownText = text(convertSeconds(timeList[i]), textX, 200 + 10 * i);
+			// convert the raw number stored in getInput into its display form
+			// use a for loop to go through intervalTable, taking each value and putting it into a list format
 	}
+
+
 }
 
 
