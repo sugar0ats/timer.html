@@ -8,6 +8,9 @@ var totalTimePaused = 0;
 var enterShown = true;
 //var resetted = false;
 var shownText;
+var textX = 100;
+var textY = 220;
+var selectBoxes = [];
 
 function convertSeconds(s) {
 	var min = floor(s / 60);
@@ -64,21 +67,34 @@ function setup() {
 	reset.mousePressed(resetEverything);
 	reset.position(10, 100);
 
+	var selectButton = createButton('select intervals');
+	selectButton.mousePressed(selectMode);
+	selectButton.position(10, 180);
+
 
 
 	function takeInput() {
 		//resetted = false;
 		//intervalTable.addColumn(getInput.value()); // add the value in the input box to intervalTable
-		((+getInput.value() <= 0 || typeof getInput.value() == 'string') ? invalidInput() : timeList.push(+getInput.value())); // also, convert the string into a number & add it to timeList (array)
+		(getInput.value() <= 0 || isNaN(parseInt(getInput.value())) ? invalidInput() : timeList.push(+getInput.value())); // also, convert the string into a number & add it to timeList (array)
+		//console.log(parseInt(getInput.value()));
+		//console.log(typeof parseInt(getInput.value()) == NaN);
+
 		 // set the first timeLeft to timeList[currentInt] (takeInput shouldn't happen when the timer is going!!)
-		if (timeList.length > 0) {
+		if (timeList.length > 0) { // if there's more than one interval, then show the start button (you can't start a timer with no intervals!)
 			timeLeft = timeList[currentInt];
 			start.show();
 		}
 	} // add what happens if getInput is undefined
 
 	function invalidInput() {
-		warning = text('enter a valid interval please!', 50, 250);
+		var warning = createDiv('enter a valid interval please!');
+		warning.position(40, 170);
+		warning.style('font-size', '12px');
+		warning.style('color', 'red');
+		setTimeout(removeWarning = () => {
+			warning.remove();
+		}, 3000)
 		//setInterval(background(255, 255, 255), 3000);
 	}
 
@@ -170,26 +186,77 @@ function setup() {
 		reset.hide();
 
 	}
+
+	function selectMode() {
+		for (i=0; i < timeList.length; i++) {
+			currentBox = new selectBox(i); // create a new "select box" for the newly drawn interval
+			selectBoxes.push(currentBox);
+			currentBox.drawBox(); // draw this box
+			console.log("is this working?");
+		}
+	}
 }
 
 function draw() {
-	var textX = 100;
-	text("Intervals:", textX, 180); // this is the title of intervalTable
+
+	text("Intervals:", textX, textY); // this is the title of intervalTable
+
+
 
 	for (i=0; i < timeList.length; i++) {
-			(i+1 == currentInt ? text("x", textX-15, 200 + 10 * i) : text(""));
+			fill('black');
+			(i+1 == currentInt ? text("x", textX-15, (textY + 20) + 12 * i) : text(""));
 			// if the interval being drawn is the current interval, display an x next to that interval
 			// that "x" stays there after the interval is over and the timer moves onto the next one
-			shownText = text(convertSeconds(timeList[i]), textX, 200 + 10 * i);
+
+			shownText = text(convertSeconds(timeList[i]), textX, (textY + 20) + 12 * i);
 			// convert the raw number stored in getInput into its display form
 			// use a for loop to go through intervalTable, taking each value and putting it into a list format
 	}
 
+}
 
+class selectBox {
+	constructor(i) {
+		let selectNum = i + 1;
+		this.name = "selector " + selectNum;
+		this.x = textX;
+		this.y = (textY + 10) + 12 * i;
+		this.color = 'green';
+		this.interval = timeList[i];
+		//this.color = color('clear');
+	}
+
+	drawBox() {
+		//fill(this.color);
+
+		return rect(this.x, this.y, 50, 12);
+	}
+
+	selected() {
+		console.log('location of button: ' + this.x, this.y);
+		//var d = dist(mouseX, mouseY, this.x, this.y);
+		if (mouseX > this.x && mouseX < this.x + 50 && mouseY > this.y && mouseY < this.y + 12) {
+			fill(this.color);
+			rect(this.x, this.y, 50, 12);
+			console.log("fjaiogpsb");
+		}
+
+	}
+
+	//selectBox.mousePressed(() => {
+		//this.color = color('green');
+		//return rect(textX, (textY + 10) + 12 * i, 50, 12);
+	//});
 }
 
 
 
 function mousePressed() {
-
+	console.log(mouseX, mouseY);
+	console.log(mouseX > this.x && mouseX < this.x + 50 && mouseY < this.y && mouseY > this.y + 12);
+	for (i=0; i < selectBoxes.length; i++) {
+		selectBoxes[i].selected();
+		console.log('hello');
+	}
 }
