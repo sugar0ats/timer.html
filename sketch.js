@@ -11,6 +11,7 @@ var shownText;
 var textX = 100;
 var textY = 220;
 var selectBoxes = [];
+var selectedIntervals = [];
 
 function convertSeconds(s) {
 	var min = floor(s / 60);
@@ -29,6 +30,10 @@ function repeatRounds(set, rounds) { // assuming that this will be used on timeL
 	timeList.push(allSets.flat());
 	timeList = timeList.flat() // make sure there are no arrays within arrays that will confuse the program when running the timer
 	return timeList; // return timeList
+}
+
+function removeFromArray(thing, array) {
+	return array.filter(item => item !== thing); // use filter to literally keep everything but thing
 }
 
 var ding; // load in the ding sfx for when an interval ends
@@ -88,13 +93,13 @@ function setup() {
 	} // add what happens if getInput is undefined
 
 	function invalidInput() {
-		var warning = createDiv('enter a valid interval please!');
+		var warning = createDiv('enter a valid interval please!'); // if the user enters something that can't be interpreted as a number, create a warning to tell the user.
 		warning.position(40, 170);
 		warning.style('font-size', '12px');
 		warning.style('color', 'red');
 		setTimeout(removeWarning = () => {
 			warning.remove();
-		}, 3000)
+		}, 3000) // use setTimeout to time the removal of the warning. It should last 3 seconds.
 		//setInterval(background(255, 255, 255), 3000);
 	}
 
@@ -156,9 +161,10 @@ function setup() {
 		timer.html(convertSeconds(timeLeft - currentTime)); // if the above conditions
 	} // are not met, display the timeLeft - currentTime. currentTime is meant to increment up by 1 each second.
 
+
 	function removeShowEnter() {
 		if (enterShown) {
-			enter.hide();
+			enter.hide(); // basically a toggle to show and hide the enter and getInput elements. It can be used to easily switch between hiding and showing the elements depending on the situation.
 			getInput.hide();
 			enterShown = false;
 		} else {
@@ -184,73 +190,72 @@ function setup() {
 		start.html(status);
 		//start.show();
 		reset.hide();
-
 	}
 
-	function selectMode() {
+	function selectMode() { // only happens when "select intervals button" is clicked, so new intervals shouldn't be added while select mode is on.
 		for (i=0; i < timeList.length; i++) {
 			currentBox = new selectBox(i); // create a new "select box" for the newly drawn interval
 			selectBoxes.push(currentBox);
-			currentBox.drawBox(); // draw this box
+			currentBox.drawBox('black'); // draw this box
 			console.log("is this working?");
 		}
 	}
 }
 
-function draw() {
+class selectBox {
+	constructor(i) {
+		let selectNum = i + 1; // index of for loop starts at 0, add 1 to get accurate position/name of box
+		this.name = selectNum;
+		this.x = textX;
+		this.y = (textY + 10) + 12 * i;
+		this.color = 'green';
+		this.interval = timeList[i]; // use timeList to set the selectBoxes' value to its corresponding interval
+		this.isSelected = false;
+		//this.color = color('clear');
+	}
 
+	drawBox(color) {
+		stroke(color);
+		return rect(this.x, this.y, 50, 12); // a function for a selectBox that draws the box..?
+	} // is a bit repetitive with selected(), can't call drawBox within selected.
+
+	selected() {
+		console.log('location of button: ' + this.x, this.y);
+		//var d = dist(mouseX, mouseY, this.x, this.y);
+		if (mouseX > this.x && mouseX < this.x + 50 && mouseY > this.y && mouseY < this.y + 12) { // test if the mouse is clicked within the box
+			if (!this.isSelected) { // if the box has not been selected before, make the outline the specified color
+				stroke(this.color);
+				rect(this.x, this.y, 50, 12);
+
+				selectedIntervals.push(this.name); // add the selectBox's name to an array creatively titled, "selectED intervals"
+				console.log('the selected intervals are ' + selectedIntervals);
+
+				this.isSelected = true; // the box is now selected :D
+			} else { // if the box is selected, reverse those effects.
+				stroke('black');
+				rect(this.x, this.y, 50, 12);
+				this.isSelected = false;
+				removeFromArray(this.name, selectedIntervals);
+			}
+		}
+	}
+}
+
+function draw() {
+	noStroke();
 	text("Intervals:", textX, textY); // this is the title of intervalTable
 
-
-
 	for (i=0; i < timeList.length; i++) {
-			fill('black');
+			noStroke();
 			(i+1 == currentInt ? text("x", textX-15, (textY + 20) + 12 * i) : text(""));
 			// if the interval being drawn is the current interval, display an x next to that interval
 			// that "x" stays there after the interval is over and the timer moves onto the next one
-
 			shownText = text(convertSeconds(timeList[i]), textX, (textY + 20) + 12 * i);
 			// convert the raw number stored in getInput into its display form
 			// use a for loop to go through intervalTable, taking each value and putting it into a list format
 	}
 
 }
-
-class selectBox {
-	constructor(i) {
-		let selectNum = i + 1;
-		this.name = "selector " + selectNum;
-		this.x = textX;
-		this.y = (textY + 10) + 12 * i;
-		this.color = 'green';
-		this.interval = timeList[i];
-		//this.color = color('clear');
-	}
-
-	drawBox() {
-		//fill(this.color);
-
-		return rect(this.x, this.y, 50, 12);
-	}
-
-	selected() {
-		console.log('location of button: ' + this.x, this.y);
-		//var d = dist(mouseX, mouseY, this.x, this.y);
-		if (mouseX > this.x && mouseX < this.x + 50 && mouseY > this.y && mouseY < this.y + 12) {
-			fill(this.color);
-			rect(this.x, this.y, 50, 12);
-			console.log("fjaiogpsb");
-		}
-
-	}
-
-	//selectBox.mousePressed(() => {
-		//this.color = color('green');
-		//return rect(textX, (textY + 10) + 12 * i, 50, 12);
-	//});
-}
-
-
 
 function mousePressed() {
 	console.log(mouseX, mouseY);
